@@ -48,8 +48,9 @@ import sinalgo.nodes.edges.Edge;
 import sinalgo.nodes.messages.Inbox;
 import sinalgo.nodes.messages.Message;
 import projects.paxos.nodes.messages.AcceptMessage;
+import projects.paxos.nodes.messages.AcceptAckMessage;
 import projects.paxos.nodes.messages.PrepareMessage;
-import projects.paxos.nodes.messages.PrepareAcceptedMessage;
+import projects.paxos.nodes.messages.PrepareAckMessage;
 
 /**
  * The absolute dummy node. Does not do anything. Good for testing network topologies.
@@ -77,16 +78,28 @@ public class PaxosNode extends Node {
 				if (pmsg.number > highestAcceptedProposalNumber) {
 					highestAcceptedProposalNumber = pmsg.number;
 					acceptedProposalValue = pmsg.value;
-					PrepareAcceptedMessage amsg = new PrepareAcceptedMessage(
+					PrepareAckMessage ack = new PrepareAckMessage(
 							highestAcceptedProposalNumber, 
 							acceptedProposalValue);
-					send(amsg, sender);
+					send(ack, sender);
 					setColor(Color.BLUE);
 				}
 			}
+			if (msg instanceof AcceptMessage) {
+				AcceptMessage amsg = (AcceptMessage) msg;
+				if (amsg.number >= highestAcceptedProposalNumber) {
+					highestAcceptedProposalNumber = amsg.number;
+					acceptedProposalValue = amsg.value;
+					AcceptAckMessage ack = new AcceptAckMessage(
+							highestAcceptedProposalNumber, 
+							acceptedProposalValue);
+					send(ack, sender);
+					setColor(Color.CYAN);
+				}
+			}
 			// Proposer
-			if (msg instanceof PrepareAcceptedMessage) {
-				PrepareAcceptedMessage amsg = (PrepareAcceptedMessage) msg;
+			if (msg instanceof PrepareAckMessage) {
+				PrepareAckMessage amsg = (PrepareAckMessage) msg;
 				if (amsg.number >= currentProposalNumber) {
 					currentProposalNumber = amsg.number;
 					currentProposalValue = amsg.value;

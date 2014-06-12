@@ -39,16 +39,16 @@ package projects.paxos.nodes.messages;
 import sinalgo.nodes.messages.Message;
 
 
-public class PrepareAcceptedMessage extends Message {
+public class AcceptAckMessage extends Message {
 	public int number = 0;
 	public String value;
 	
-	public PrepareAcceptedMessage(int n, String v){
+	public AcceptAckMessage(int n, String v){
 		number = n;
 		value = v;
 	}
 	
 	public Message clone(){
-		return new PrepareAcceptedMessage(this.number, this.value);
+		return new AcceptAckMessage(this.number, this.value);
 	}
 }
