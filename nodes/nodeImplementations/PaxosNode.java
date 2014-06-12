@@ -71,6 +71,7 @@ public class PaxosNode extends Node {
 			if (msg instanceof PrepareMessage) {
 				int value = ((PrepareMessage) msg).value;
 				if (value > highestProposal) {
+					highestProposal = value;
 					send(new AcceptMessage(value), sender);
 					setColor(Color.GREEN);
 				}
