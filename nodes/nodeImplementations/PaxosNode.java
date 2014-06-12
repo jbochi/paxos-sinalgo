@@ -46,17 +46,37 @@ import sinalgo.gui.transformation.PositionTransformation;
 import sinalgo.nodes.Node;
 import sinalgo.nodes.edges.Edge;
 import sinalgo.nodes.messages.Inbox;
+import sinalgo.nodes.messages.Message;
+import projects.mutualExclusion.nodes.messages.ReqMessage;
 import projects.paxos.nodes.messages.PrepareMessage;
+import projects.paxos.nodes.messages.AcceptMessage;
 
 /**
  * The absolute dummy node. Does not do anything. Good for testing network topologies.
  */
 public class PaxosNode extends Node {
+	// proposer variables
 	boolean distinguished = false;
 	int currentProposal = 0;
 	
+	// acceptor variables
+	int highestProposal = 0;
+
 	@Override
-	public void handleMessages(Inbox inbox) {}
+	public void handleMessages(Inbox inbox) {
+		while(inbox.hasNext()) {
+			Message msg = inbox.next();
+			Node sender = inbox.getSender();
+			// Acceptor
+			if (msg instanceof PrepareMessage) {
+				int value = ((PrepareMessage) msg).value;
+				if (value > highestProposal) {
+					send(new AcceptMessage(value), sender);
+					setColor(Color.GREEN);
+				}
+			}
+		}
+	}
 
 	@Override
 	public void preStep() {
