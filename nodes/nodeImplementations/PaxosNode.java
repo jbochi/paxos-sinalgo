@@ -75,7 +75,10 @@ public class PaxosNode extends Node {
 
 	@Override
 	public void neighborhoodChange() {
-		PrepareMessage msg = new PrepareMessage(currentProposal);
+		if (distinguished) {
+			PrepareMessage msg = new PrepareMessage(currentProposal);
+			broadcast(msg);			
+		}
 	}
 
 	@Override

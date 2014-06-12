@@ -26,7 +26,7 @@
 		<mobility value="true" />
 
 		<!--If set to true, the chosen interference model is called at the end of every round to test for interferring packets. To increase performance, set this flag to FALSE if you do not consider interference.-->
-		<interference value="true" />
+		<interference value="false" />
 
 		<!--Set this flag to true if interference only decreases if  less messages are being sent and increases if more messages are being sent. This flag enables considerable optimizations. -->
 		<interferenceIsAdditive value="true" />
@@ -113,7 +113,7 @@
 		<!--  Models                                                               -->
 		<!--***********************************************************************-->
 		<!--The message transmission model used when none is specified-->
-		<DefaultMessageTransmissionModel value="ConstantTime" />
+		<DefaultMessageTransmissionModel value="RandomTime" />
 
 		<!--Default connectivity model used when none is specified-->
 		<DefaultConnectivityModel value="UDG" />
@@ -180,7 +180,10 @@
 
 	</Framework>
 	<Custom>
+
 <MessageTransmission ConstantTime="1"/>
+
+<RandomMessageTransmission distribution="Uniform" min="1" max="10"/>
 	
 <Node defaultSize="10" />
 
