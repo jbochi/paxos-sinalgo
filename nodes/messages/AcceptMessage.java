@@ -40,13 +40,15 @@ import sinalgo.nodes.messages.Message;
 
 
 public class AcceptMessage extends Message {
-	public int value = 0; 
+	public int number = 0;
+	public String value;
 	
-	public AcceptMessage(int i){
-		value = i;
+	public AcceptMessage(int n, String v){
+		number = n;
+		value = v;
 	}
 	
 	public Message clone(){
-		return new AcceptMessage(this.value);
+		return new AcceptMessage(this.number, this.value);
 	}
 }

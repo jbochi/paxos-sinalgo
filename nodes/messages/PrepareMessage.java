@@ -40,13 +40,15 @@ import sinalgo.nodes.messages.Message;
 
 
 public class PrepareMessage extends Message {
-	public int value = 0; 
+	public int number = 0;
+	public String value;
 	
-	public PrepareMessage(int i){
-		value = i;
+	public PrepareMessage(int n, String v){
+		number = n;
+		value = v;
 	}
 	
 	public Message clone(){
-		return new PrepareMessage(this.value);
+		return new PrepareMessage(this.number, this.value);
 	}
 }

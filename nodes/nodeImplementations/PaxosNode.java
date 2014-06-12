@@ -47,7 +47,6 @@ import sinalgo.nodes.Node;
 import sinalgo.nodes.edges.Edge;
 import sinalgo.nodes.messages.Inbox;
 import sinalgo.nodes.messages.Message;
-import projects.mutualExclusion.nodes.messages.ReqMessage;
 import projects.paxos.nodes.messages.PrepareMessage;
 import projects.paxos.nodes.messages.AcceptMessage;
 
@@ -57,10 +56,12 @@ import projects.paxos.nodes.messages.AcceptMessage;
 public class PaxosNode extends Node {
 	// proposer variables
 	boolean distinguished = false;
-	int currentProposal = 0;
+	int currentProposalNumber = 0;
+	String currentProposalValue;
 	
 	// acceptor variables
-	int highestProposal = 0;
+	int highestAcceptedProposalNumber = 0;
+	String acceptedProposalValue;
 
 	@Override
 	public void handleMessages(Inbox inbox) {
@@ -69,10 +70,14 @@ public class PaxosNode extends Node {
 			Node sender = inbox.getSender();
 			// Acceptor
 			if (msg instanceof PrepareMessage) {
-				int value = ((PrepareMessage) msg).value;
-				if (value > highestProposal) {
-					highestProposal = value;
-					send(new AcceptMessage(value), sender);
+				PrepareMessage pmsg = (PrepareMessage) msg;
+				if (pmsg.number > highestAcceptedProposalNumber) {
+					highestAcceptedProposalNumber = pmsg.number;
+					acceptedProposalValue = pmsg.value;
+					AcceptMessage amsg = new AcceptMessage(
+							highestAcceptedProposalNumber, 
+							acceptedProposalValue);
+					send(amsg, sender);
 					setColor(Color.GREEN);
 				}
 			}
@@ -81,8 +86,9 @@ public class PaxosNode extends Node {
 
 	@Override
 	public void preStep() {
-		if (currentProposal == 0) {
-			currentProposal = 1;
+		if (currentProposalValue == null) {
+			currentProposalNumber = 1;
+			currentProposalValue = "A";
 		}
 	}
 
@@ -97,7 +103,7 @@ public class PaxosNode extends Node {
 	@Override
 	public void neighborhoodChange() {
 		if (distinguished) {
-			PrepareMessage msg = new PrepareMessage(currentProposal);
+			PrepareMessage msg = new PrepareMessage(currentProposalNumber, currentProposalValue);
 			broadcast(msg);			
 		}
 	}
