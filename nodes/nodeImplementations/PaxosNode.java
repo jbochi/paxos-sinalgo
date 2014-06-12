@@ -58,6 +58,7 @@ public class PaxosNode extends Node {
 	boolean distinguished = false;
 	int currentProposalNumber = 0;
 	String currentProposalValue;
+	int proposalsAccepted = 0;
 	
 	// acceptor variables
 	int highestAcceptedProposalNumber = 0;
@@ -79,6 +80,15 @@ public class PaxosNode extends Node {
 							acceptedProposalValue);
 					send(amsg, sender);
 					setColor(Color.GREEN);
+				}
+			}
+			// Proposer
+			if (msg instanceof AcceptMessage) {
+				AcceptMessage amsg = (AcceptMessage) msg;
+				if (amsg.number >= currentProposalNumber) {
+					currentProposalNumber = amsg.number;
+					currentProposalValue = amsg.value;
+					proposalsAccepted++;
 				}
 			}
 		}
@@ -126,6 +136,9 @@ public class PaxosNode extends Node {
 	@Override
 	public void draw(Graphics g, PositionTransformation pt, boolean highlight) {
 		String text = String.valueOf(this.ID);
+		if (distinguished) {
+			text += " (" + proposalsAccepted + ")";
+		}
 		super.drawNodeAsSquareWithText(g, pt, highlight, text, 25, Color.WHITE);
 	}
 	
