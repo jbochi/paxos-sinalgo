@@ -40,6 +40,8 @@ package projects.paxos.nodes.nodeImplementations;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.HashSet;
 
 import sinalgo.configuration.WrongConfigurationException;
 import sinalgo.gui.transformation.PositionTransformation;
@@ -60,12 +62,15 @@ public class PaxosNode extends Node {
 	boolean distinguished = false;
 	int currentProposalNumber = 0;
 	String currentProposalValue;
-	int proposalsAccepted = 0;
+	Set<Integer> proposalsAccepted = new HashSet<Integer>();
+	Set<Integer> accepts = new HashSet<Integer>();
 	int N_NODES = 64;
 	
 	// acceptor variables
 	int highestAcceptedProposalNumber = 0;
 	String acceptedProposalValue;
+	boolean prepared = false;
+	boolean accepted = false;
 
 	@Override
 	public void handleMessages(Inbox inbox) {
@@ -82,7 +87,7 @@ public class PaxosNode extends Node {
 							highestAcceptedProposalNumber, 
 							acceptedProposalValue);
 					send(ack, sender);
-					setColor(Color.BLUE);
+					prepared = true;
 				}
 			}
 			if (msg instanceof AcceptMessage) {
@@ -94,7 +99,7 @@ public class PaxosNode extends Node {
 							highestAcceptedProposalNumber, 
 							acceptedProposalValue);
 					send(ack, sender);
-					setColor(Color.CYAN);
+					accepted = true;
 				}
 			}
 			// Proposer
@@ -103,7 +108,16 @@ public class PaxosNode extends Node {
 				if (amsg.number >= currentProposalNumber) {
 					currentProposalNumber = amsg.number;
 					currentProposalValue = amsg.value;
-					proposalsAccepted++;
+					proposalsAccepted.add(sender.ID);
+				}
+			}
+			// Learner
+			if (msg instanceof AcceptAckMessage) {
+				AcceptAckMessage amsg = (AcceptAckMessage) msg;
+				if (amsg.number >= currentProposalNumber) {
+					currentProposalNumber = amsg.number;
+					currentProposalValue = amsg.value;
+					accepts.add(sender.ID);
 				}
 			}
 		}
@@ -111,9 +125,12 @@ public class PaxosNode extends Node {
 
 	@Override
 	public void preStep() {
-		if (currentProposalValue == null) {
-			currentProposalNumber = 1;
-			currentProposalValue = "A";
+		// Proposer
+		if (distinguished) {
+			if (currentProposalValue == null) {
+				currentProposalNumber = 1;
+				currentProposalValue = "A";
+			}			
 		}
 	}
 
@@ -121,7 +138,6 @@ public class PaxosNode extends Node {
 	public void init() {
 		if (this.ID == 1) {
 			distinguished = true;
-			setColor(Color.RED);
 		}
 	}
 
@@ -131,8 +147,7 @@ public class PaxosNode extends Node {
 		if (distinguished) {
 			PrepareMessage pmsg = new PrepareMessage(currentProposalNumber, currentProposalValue);
 			broadcast(pmsg);	
-			if (proposalsAccepted > N_NODES/2) {
-				setColor(Color.GREEN);
+			if (proposalsAccepted.size() > N_NODES/2) {
 				AcceptMessage amsg = new AcceptMessage(currentProposalNumber, currentProposalValue);
 				broadcast(amsg);
 			}
@@ -144,21 +159,29 @@ public class PaxosNode extends Node {
 	
 	@Override
 	public String toString() {
-		String s = "Node(" + this.ID + ") [";
-		Iterator<Edge> edgeIter = this.outgoingConnections.iterator();
-		while(edgeIter.hasNext()){
-			Edge e = edgeIter.next();
-			Node n = e.endNode;
-			s+=n.ID+" ";
-		}
-		return s + "]";
+		String s = "Node(" + this.ID + ")\n";
+		s += "Accepts: " + accepts + "\n";
+		s += "Proposal Ack:" + proposalsAccepted;
+		return s;
 	}
 
 	@Override
 	public void draw(Graphics g, PositionTransformation pt, boolean highlight) {
+		if (accepts.size() > N_NODES/2) {
+			setColor(Color.ORANGE);
+		} else if (proposalsAccepted.size() > N_NODES/2) {
+			setColor(Color.GREEN);
+		} else if (distinguished) {
+			setColor(Color.RED);
+		} else if (prepared) {
+			setColor(Color.BLUE);
+		} else if (accepted) {
+			setColor(Color.CYAN);
+		}
+		
 		String text = String.valueOf(this.ID);
 		if (distinguished) {
-			text += " (" + proposalsAccepted + ")";
+			text += " (" + accepts.size() + "/" + proposalsAccepted.size() + ")";
 		}
 		super.drawNodeAsSquareWithText(g, pt, highlight, text, 25, Color.WHITE);
 	}
