@@ -51,6 +51,7 @@ import sinalgo.nodes.messages.Inbox;
  * The absolute dummy node. Does not do anything. Good for testing network topologies.
  */
 public class PaxosNode extends Node {
+	boolean distinguished = false;
 	
 	@Override
 	public void handleMessages(Inbox inbox) {}
@@ -59,7 +60,12 @@ public class PaxosNode extends Node {
 	public void preStep() {}
 
 	@Override
-	public void init() {}
+	public void init() {
+		if (this.ID == 1) {
+			distinguished = true;
+			setColor(Color.RED);
+		}
+	}
 
 	@Override
 	public void neighborhoodChange() {}
@@ -81,8 +87,7 @@ public class PaxosNode extends Node {
 
 	@Override
 	public void draw(Graphics g, PositionTransformation pt, boolean highlight) {
-		String text;
-		text = String.valueOf(this.ID);
+		String text = String.valueOf(this.ID);
 		super.drawNodeAsSquareWithText(g, pt, highlight, text, 25, Color.WHITE);
 	}
 	
