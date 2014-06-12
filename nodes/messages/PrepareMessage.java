@@ -34,72 +34,19 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package projects.paxos.nodes.nodeImplementations;
+package projects.paxos.nodes.messages;
+
+import sinalgo.nodes.messages.Message;
 
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.util.Iterator;
-
-import sinalgo.configuration.WrongConfigurationException;
-import sinalgo.gui.transformation.PositionTransformation;
-import sinalgo.nodes.Node;
-import sinalgo.nodes.edges.Edge;
-import sinalgo.nodes.messages.Inbox;
-import projects.paxos.nodes.messages.PrepareMessage;
-
-/**
- * The absolute dummy node. Does not do anything. Good for testing network topologies.
- */
-public class PaxosNode extends Node {
-	boolean distinguished = false;
-	int currentProposal = 0;
+public class PrepareMessage extends Message {
+	public int value = 0; 
 	
-	@Override
-	public void handleMessages(Inbox inbox) {}
-
-	@Override
-	public void preStep() {
-		if (currentProposal == 0) {
-			currentProposal = 1;
-		}
-	}
-
-	@Override
-	public void init() {
-		if (this.ID == 1) {
-			distinguished = true;
-			setColor(Color.RED);
-		}
-	}
-
-	@Override
-	public void neighborhoodChange() {
-		PrepareMessage msg = new PrepareMessage(currentProposal);
-	}
-
-	@Override
-	public void postStep() {}
-	
-	@Override
-	public String toString() {
-		String s = "Node(" + this.ID + ") [";
-		Iterator<Edge> edgeIter = this.outgoingConnections.iterator();
-		while(edgeIter.hasNext()){
-			Edge e = edgeIter.next();
-			Node n = e.endNode;
-			s+=n.ID+" ";
-		}
-		return s + "]";
-	}
-
-	@Override
-	public void draw(Graphics g, PositionTransformation pt, boolean highlight) {
-		String text = String.valueOf(this.ID);
-		super.drawNodeAsSquareWithText(g, pt, highlight, text, 25, Color.WHITE);
+	public PrepareMessage(int i){
+		value = i;
 	}
 	
-	@Override
-	public void checkRequirements() throws WrongConfigurationException {}
-
+	public Message clone(){
+		return new PrepareMessage(this.value);
+	}
 }
