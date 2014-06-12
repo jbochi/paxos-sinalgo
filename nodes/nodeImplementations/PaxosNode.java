@@ -47,8 +47,9 @@ import sinalgo.nodes.Node;
 import sinalgo.nodes.edges.Edge;
 import sinalgo.nodes.messages.Inbox;
 import sinalgo.nodes.messages.Message;
-import projects.paxos.nodes.messages.PrepareMessage;
 import projects.paxos.nodes.messages.AcceptMessage;
+import projects.paxos.nodes.messages.PrepareMessage;
+import projects.paxos.nodes.messages.PrepareAcceptedMessage;
 
 /**
  * The absolute dummy node. Does not do anything. Good for testing network topologies.
@@ -59,6 +60,7 @@ public class PaxosNode extends Node {
 	int currentProposalNumber = 0;
 	String currentProposalValue;
 	int proposalsAccepted = 0;
+	int N_NODES = 64;
 	
 	// acceptor variables
 	int highestAcceptedProposalNumber = 0;
@@ -75,16 +77,16 @@ public class PaxosNode extends Node {
 				if (pmsg.number > highestAcceptedProposalNumber) {
 					highestAcceptedProposalNumber = pmsg.number;
 					acceptedProposalValue = pmsg.value;
-					AcceptMessage amsg = new AcceptMessage(
+					PrepareAcceptedMessage amsg = new PrepareAcceptedMessage(
 							highestAcceptedProposalNumber, 
 							acceptedProposalValue);
 					send(amsg, sender);
-					setColor(Color.GREEN);
+					setColor(Color.BLUE);
 				}
 			}
 			// Proposer
-			if (msg instanceof AcceptMessage) {
-				AcceptMessage amsg = (AcceptMessage) msg;
+			if (msg instanceof PrepareAcceptedMessage) {
+				PrepareAcceptedMessage amsg = (PrepareAcceptedMessage) msg;
 				if (amsg.number >= currentProposalNumber) {
 					currentProposalNumber = amsg.number;
 					currentProposalValue = amsg.value;
@@ -112,9 +114,15 @@ public class PaxosNode extends Node {
 
 	@Override
 	public void neighborhoodChange() {
+		// Proposer
 		if (distinguished) {
-			PrepareMessage msg = new PrepareMessage(currentProposalNumber, currentProposalValue);
-			broadcast(msg);			
+			PrepareMessage pmsg = new PrepareMessage(currentProposalNumber, currentProposalValue);
+			broadcast(pmsg);	
+			if (proposalsAccepted > N_NODES/2) {
+				setColor(Color.GREEN);
+				AcceptMessage amsg = new AcceptMessage(currentProposalNumber, currentProposalValue);
+				broadcast(amsg);
+			}
 		}
 	}
 
