@@ -170,7 +170,7 @@
 		<arrowWidth value="1" />
 
 		<!--The default value of the rounds field.-->
-		<defaultRoundNumber value="1" />
+		<defaultRoundNumber value="100" />
 
 		<!--EPS 2 PDF command: This is the command that is used to convert an EPS file  into a PDF file. You can use the following parameters:   %s is the complete path from the root folder of the      framework to the SOURCE file (the eps)   %t is the complete path from the root folder of the      framework to the TARGET file (the pdf) These placeholders are set by the framework. Example:   'epstopdf %s')-->
 		<epsToPdfCommand value="epstopdf %s" />

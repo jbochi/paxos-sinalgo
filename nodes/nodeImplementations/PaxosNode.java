@@ -39,18 +39,17 @@ package projects.paxos.nodes.nodeImplementations;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
 
 import sinalgo.configuration.WrongConfigurationException;
 import sinalgo.gui.transformation.PositionTransformation;
 import sinalgo.nodes.Node;
-import sinalgo.nodes.edges.Edge;
 import sinalgo.nodes.messages.Inbox;
 import sinalgo.nodes.messages.Message;
 import projects.paxos.nodes.messages.AcceptMessage;
 import projects.paxos.nodes.messages.AcceptAckMessage;
+import projects.paxos.nodes.messages.LearnMessage;
 import projects.paxos.nodes.messages.PrepareMessage;
 import projects.paxos.nodes.messages.PrepareAckMessage;
 
@@ -65,12 +64,16 @@ public class PaxosNode extends Node {
 	Set<Integer> proposalsAccepted = new HashSet<Integer>();
 	Set<Integer> accepts = new HashSet<Integer>();
 	int N_NODES = 64;
-	
+
 	// acceptor variables
 	int highestAcceptedProposalNumber = 0;
 	String acceptedProposalValue;
 	boolean prepared = false;
 	boolean accepted = false;
+
+	// learner variables
+	boolean learned = false;
+	String learnedValue = null;
 
 	@Override
 	public void handleMessages(Inbox inbox) {
@@ -119,7 +122,16 @@ public class PaxosNode extends Node {
 					currentProposalValue = amsg.value;
 					accepts.add(sender.ID);
 					proposalsAccepted.add(sender.ID);
+					if (accepts.size() > N_NODES/2) {
+						learned = true;
+						learnedValue = currentProposalValue;
+					};
 				}
+			}
+			if (msg instanceof LearnMessage) {
+				learned = true;
+				LearnMessage lmsg = (LearnMessage) msg;
+				learnedValue = lmsg.value;
 			}
 		}
 	}
@@ -148,16 +160,20 @@ public class PaxosNode extends Node {
 		if (distinguished) {
 			PrepareMessage pmsg = new PrepareMessage(currentProposalNumber, currentProposalValue);
 			broadcast(pmsg);	
-			if (proposalsAccepted.size() > N_NODES/2) {
+			if (has_majority()) {
 				AcceptMessage amsg = new AcceptMessage(currentProposalNumber, currentProposalValue);
 				broadcast(amsg);
+			}
+			if (learned) {
+				LearnMessage lmsg = new LearnMessage(learnedValue);
+				broadcast(lmsg);
 			}
 		}
 	}
 
 	@Override
 	public void postStep() {}
-	
+
 	@Override
 	public String toString() {
 		String s = "Node(" + this.ID + ")\n";
@@ -166,11 +182,15 @@ public class PaxosNode extends Node {
 		return s;
 	}
 
+	private boolean has_majority() {
+		return proposalsAccepted.size() > N_NODES/2;
+	}
+
 	@Override
 	public void draw(Graphics g, PositionTransformation pt, boolean highlight) {
-		if (accepts.size() > N_NODES/2) {
+		if (learned) {
 			setColor(Color.ORANGE);
-		} else if (proposalsAccepted.size() > N_NODES/2) {
+		} else if (has_majority()) {
 			setColor(Color.GREEN);
 		} else if (distinguished) {
 			setColor(Color.RED);
