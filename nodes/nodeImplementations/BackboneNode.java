@@ -37,9 +37,12 @@
 package projects.paxos.nodes.nodeImplementations;
 
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.util.Iterator;
 
 import sinalgo.configuration.WrongConfigurationException;
+import sinalgo.gui.transformation.PositionTransformation;
 import sinalgo.nodes.Node;
 import sinalgo.nodes.edges.Edge;
 import sinalgo.nodes.messages.Inbox;
@@ -74,6 +77,12 @@ public class BackboneNode extends Node {
 			s+=n.ID+" ";
 		}
 		return s + "]";
+	}
+
+	@Override
+	public void draw(Graphics g, PositionTransformation pt, boolean highlight) {
+		setColor(Color.RED);
+		super.drawNodeAsSquareWithText(g, pt, highlight, "", 25, Color.WHITE);
 	}
 
 	@Override

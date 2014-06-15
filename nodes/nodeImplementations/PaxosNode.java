@@ -118,6 +118,7 @@ public class PaxosNode extends Node {
 					currentProposalNumber = amsg.number;
 					currentProposalValue = amsg.value;
 					accepts.add(sender.ID);
+					proposalsAccepted.add(sender.ID);
 				}
 			}
 		}
@@ -173,10 +174,10 @@ public class PaxosNode extends Node {
 			setColor(Color.GREEN);
 		} else if (distinguished) {
 			setColor(Color.RED);
-		} else if (prepared) {
-			setColor(Color.BLUE);
 		} else if (accepted) {
 			setColor(Color.CYAN);
+		} else if (prepared) {
+			setColor(Color.BLUE);
 		}
 		
 		String text = String.valueOf(this.ID);
