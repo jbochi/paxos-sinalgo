@@ -43,12 +43,16 @@ public class PrepareAckMessage extends TimestampedMessage {
 	public int number = 0;
 	public String value;
 	
-	public PrepareAckMessage(int n, String v){
+	public PrepareAckMessage(int n, String v) {
 		number = n;
 		value = v;
 	}
 	
-	public Message clone(){
-		return new PrepareAckMessage(this.number, this.value);
+	public Message clone() {
+		PrepareAckMessage m = new PrepareAckMessage(this.number, this.value);
+		m.finalDestination = this.finalDestination;
+		m.originalSender = this.originalSender;
+		m.timestamp = this.timestamp;
+		return m;
 	}
 }

@@ -36,9 +36,12 @@
 */
 package projects.paxos.nodes.messages;
 
+import sinalgo.nodes.Node;
 import sinalgo.nodes.messages.Message;
 
 
 public abstract class TimestampedMessage extends Message {
+	public Node finalDestination = null;
+	public Node originalSender;
 	public int timestamp = 0;
 }

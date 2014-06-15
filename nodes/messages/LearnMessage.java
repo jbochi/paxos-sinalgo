@@ -40,7 +40,6 @@ import sinalgo.nodes.messages.Message;
 
 
 public class LearnMessage extends TimestampedMessage {
-	public int number = 0;
 	public String value;
 	
 	public LearnMessage(String v){
@@ -48,6 +47,10 @@ public class LearnMessage extends TimestampedMessage {
 	}
 	
 	public Message clone(){
-		return new LearnMessage(this.value);
+		LearnMessage m = new LearnMessage(this.value);
+		m.finalDestination = this.finalDestination;
+		m.originalSender = this.originalSender;
+		m.timestamp = this.timestamp;
+		return m;
 	}
 }

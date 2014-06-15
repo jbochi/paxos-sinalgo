@@ -49,6 +49,10 @@ public class AcceptMessage extends TimestampedMessage {
 	}
 	
 	public Message clone(){
-		return new AcceptMessage(this.number, this.value);
+		AcceptMessage m = new AcceptMessage(this.number, this.value);
+		m.finalDestination = this.finalDestination;
+		m.originalSender = this.originalSender;
+		m.timestamp = this.timestamp;
+		return m;
 	}
 }

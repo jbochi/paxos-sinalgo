@@ -49,6 +49,10 @@ public class AcceptAckMessage extends TimestampedMessage {
 	}
 	
 	public Message clone(){
-		return new AcceptAckMessage(this.number, this.value);
+		AcceptAckMessage m = new AcceptAckMessage(this.number, this.value);
+		m.finalDestination = this.finalDestination;
+		m.originalSender = this.originalSender;
+		m.timestamp = this.timestamp;
+		return m;
 	}
 }

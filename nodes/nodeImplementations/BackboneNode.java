@@ -39,21 +39,38 @@ package projects.paxos.nodes.nodeImplementations;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.HashMap;
 import java.util.Iterator;
 
+import projects.paxos.nodes.messages.TimestampedMessage;
 import sinalgo.configuration.WrongConfigurationException;
 import sinalgo.gui.transformation.PositionTransformation;
 import sinalgo.nodes.Node;
 import sinalgo.nodes.edges.Edge;
 import sinalgo.nodes.messages.Inbox;
+import sinalgo.nodes.messages.Message;
 
 /**
  * The absolute dummy node. Does not do anything. Good for testing network topologies.
  */
 public class BackboneNode extends Node {
+	HashMap<Node, Integer> vectorTS = new HashMap<Node, Integer>();
 	
 	@Override
-	public void handleMessages(Inbox inbox) {}
+	public void handleMessages(Inbox inbox) {
+		while(inbox.hasNext()) {
+			Message msg = inbox.next();
+			if (msg instanceof TimestampedMessage) {
+				TimestampedMessage tmsg = (TimestampedMessage) msg;
+				Node sender = tmsg.originalSender;
+				int maxTimestamp = vectorTS.containsKey(sender) ? vectorTS.get(sender) : -1;
+				if (tmsg.timestamp > maxTimestamp) {
+					vectorTS.put(sender, tmsg.timestamp);
+					broadcast(tmsg);
+				}
+			}
+		}
+	}
 
 	@Override
 	public void preStep() {}

@@ -49,6 +49,10 @@ public class PrepareMessage extends TimestampedMessage {
 	}
 	
 	public Message clone(){
-		return new PrepareMessage(this.number, this.value);
+		PrepareMessage m = new PrepareMessage(this.number, this.value);
+		m.finalDestination = this.finalDestination;
+		m.originalSender = this.originalSender;
+		m.timestamp = this.timestamp;
+		return m;
 	}
 }

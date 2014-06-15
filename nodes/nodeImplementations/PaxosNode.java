@@ -84,6 +84,13 @@ public class PaxosNode extends Node {
 		while(inbox.hasNext()) {
 			Message msg = inbox.next();
 			Node sender = inbox.getSender();
+			if (msg instanceof TimestampedMessage) {
+				TimestampedMessage tmsg = (TimestampedMessage) msg;
+				if (tmsg.finalDestination != null && tmsg.finalDestination != this) {
+					continue;
+				}
+				sender = tmsg.originalSender;
+			}
 			// Acceptor
 			if (msg instanceof PrepareMessage) {
 				PrepareMessage pmsg = (PrepareMessage) msg;
@@ -177,12 +184,15 @@ public class PaxosNode extends Node {
 
 	private void sendTS(TimestampedMessage ts, Node n) {
 		ts.timestamp = timestamp++;
-		send((Message) ts, n);
+		ts.originalSender = this;
+		ts.finalDestination = n;
+		broadcast(ts);
 	}
 
 	private void broadcastTS(TimestampedMessage ts) {
 		ts.timestamp = timestamp++;
-		broadcast((Message) ts);
+		ts.originalSender = this;
+		broadcast(ts);
 	}
 
 	@Override
