@@ -52,6 +52,7 @@ import projects.paxos.nodes.messages.AcceptAckMessage;
 import projects.paxos.nodes.messages.LearnMessage;
 import projects.paxos.nodes.messages.PrepareMessage;
 import projects.paxos.nodes.messages.PrepareAckMessage;
+import projects.paxos.nodes.messages.TimestampedMessage;
 
 /**
  * The absolute dummy node. Does not do anything. Good for testing network topologies.
@@ -75,6 +76,9 @@ public class PaxosNode extends Node {
 	boolean learned = false;
 	String learnedValue = null;
 
+	// logic clock
+	int timestamp = 0;
+
 	@Override
 	public void handleMessages(Inbox inbox) {
 		while(inbox.hasNext()) {
@@ -89,7 +93,7 @@ public class PaxosNode extends Node {
 					PrepareAckMessage ack = new PrepareAckMessage(
 							highestAcceptedProposalNumber, 
 							acceptedProposalValue);
-					send(ack, sender);
+					sendTS(ack, sender);
 					prepared = true;
 				}
 			}
@@ -101,7 +105,7 @@ public class PaxosNode extends Node {
 					AcceptAckMessage ack = new AcceptAckMessage(
 							highestAcceptedProposalNumber, 
 							acceptedProposalValue);
-					send(ack, sender);
+					sendTS(ack, sender);
 					accepted = true;
 				}
 			}
@@ -159,16 +163,26 @@ public class PaxosNode extends Node {
 		// Proposer
 		if (distinguished) {
 			PrepareMessage pmsg = new PrepareMessage(currentProposalNumber, currentProposalValue);
-			broadcast(pmsg);	
+			broadcastTS(pmsg);
 			if (has_majority()) {
 				AcceptMessage amsg = new AcceptMessage(currentProposalNumber, currentProposalValue);
-				broadcast(amsg);
+				broadcastTS(amsg);
 			}
 			if (learned) {
 				LearnMessage lmsg = new LearnMessage(learnedValue);
-				broadcast(lmsg);
+				broadcastTS(lmsg);
 			}
 		}
+	}
+
+	private void sendTS(TimestampedMessage ts, Node n) {
+		ts.timestamp = timestamp++;
+		send((Message) ts, n);
+	}
+
+	private void broadcastTS(TimestampedMessage ts) {
+		ts.timestamp = timestamp++;
+		broadcast((Message) ts);
 	}
 
 	@Override

@@ -39,7 +39,7 @@ package projects.paxos.nodes.messages;
 import sinalgo.nodes.messages.Message;
 
 
-public class AcceptAckMessage extends Message {
+public class AcceptAckMessage extends TimestampedMessage {
 	public int number = 0;
 	public String value;
 	

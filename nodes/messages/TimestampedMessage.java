@@ -39,16 +39,6 @@ package projects.paxos.nodes.messages;
 import sinalgo.nodes.messages.Message;
 
 
-public class PrepareAckMessage extends TimestampedMessage {
-	public int number = 0;
-	public String value;
-	
-	public PrepareAckMessage(int n, String v){
-		number = n;
-		value = v;
-	}
-	
-	public Message clone(){
-		return new PrepareAckMessage(this.number, this.value);
-	}
+public abstract class TimestampedMessage extends Message {
+	public int timestamp = 0;
 }
